@@ -78,6 +78,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends gnupg && \
 # Ship the wallpaper and XFCE defaults; personal settings can override them.
 COPY assets/xc_logo_alpha_channel.png /usr/share/xc-desktop/wallpaper.png
 COPY assets/xfce4-desktop.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+COPY assets/shortcuts/ /usr/share/xc-desktop/shortcuts/
+COPY scripts/xc-desktop-start /usr/local/bin/xc-desktop-start
+RUN chmod 755 /usr/local/bin/xc-desktop-start
 
 # Rename the default Ubuntu account and move its home before declaring the volume.
 RUN usermod -l xc -d /home/xc -m ubuntu && groupmod -n xc ubuntu
@@ -91,4 +94,4 @@ ENV DEBIAN_FRONTEND=dialog
 USER xc
 ENV HOME=/home/xc USER=xc LOGNAME=xc
 EXPOSE 8080
-CMD ["selkies", "session", "--session=xfce", "--public", "--port=8080", "--enable-https=true", "--basic-auth-user=xc"]
+CMD ["/usr/local/bin/xc-desktop-start"]

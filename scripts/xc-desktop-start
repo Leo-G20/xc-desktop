@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+
+# Seed shortcuts once per workspace; subsequent edits or deletions are kept.
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/xc-desktop"
+if [ ! -e "$state_dir/shortcuts-initialized" ]; then
+    mkdir -p "$HOME/Desktop" "$state_dir"
+    for shortcut in /usr/share/xc-desktop/shortcuts/*.desktop; do
+        destination="$HOME/Desktop/${shortcut##*/}"
+        if [ ! -e "$destination" ]; then
+            cp "$shortcut" "$destination"
+            chmod 755 "$destination"
+        fi
+    done
+    touch "$state_dir/shortcuts-initialized"
+fi
+
+exec selkies session --session=xfce --public --port=8080 --enable-https=true --basic-auth-user=xc
