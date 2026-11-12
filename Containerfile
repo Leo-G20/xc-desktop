@@ -3,11 +3,12 @@ FROM ubuntu:24.04
 # Set apt to non iteractive during build time
 ENV DEBIAN_FRONTEND=noniteractive
 
+WORKDIR /xc_install
+ARG XC_COMMIT_ID=0cf68aae1830d9e33121a4ec0c1f7d682d330ca1
+
 ARG MAKE_WORKERS=4
 ARG RUN_TESTS=0
-ARG XC_COMMIT_ID=0081f13
 
-WORKDIR /xc_install
 
 RUN \
     # Update and upgrade apt
@@ -28,24 +29,26 @@ RUN \
     sudo apt install -y gnuplot python3-pip bc graphicsmagick-imagemagick-compat && \
     sudo apt install -y mayavi2 python3-ezdxf python3-cairo python3-cairo-dev && \
     sudo apt install -y libgmsh-dev python3-gmsh python3-pygmsh libgmsh4.12 && \
-    sudo apt clean && \
-    # Clone Repository
-    base_dir=`pwd` && \
-    git clone https://github.com/xcfem/xc/ xc && \
+    sudo apt clean
+
+# Fetch a fixed XC revision. Changing it does not invalidate dependency installation.
+RUN git clone https://github.com/Leo-G20/xc/ xc && \
     cd xc && \
-    # Switch to the specific branch
-    git switch --detach "$XC_COMMIT_ID" && \
-    # RUN CMake and build using Make
-    mkdir $base_dir/build && \
-    cd $base_dir/build && \
-    cmake $base_dir/xc/src && \
+    git switch --detach "$XC_COMMIT_ID"
+
+# Configure and build XC.
+RUN mkdir /xc_install/build && \
+    cd /xc_install/build && \
+    cmake /xc_install/xc/src && \
     make -j "$MAKE_WORKERS" && \
-    sudo make install && \
-    # Install XC
-    cd $base_dir/xc/python_modules && \
-    sudo sh local_install.sh && \
-    # Verify installation running tests
-    if [ "$RUN_TESTS" -ne 0 ]; then cd $base_dir/xc/verif && sh run_verif.sh; fi
+    sudo make install
+
+# Install the XC Python modules.
+RUN cd /xc_install/xc/python_modules && \
+    sudo sh local_install.sh
+
+# The full verification suite is optional and disabled by default.
+RUN if [ "$RUN_TESTS" -ne 0 ]; then cd /xc_install/xc/verif && sh run_verif.sh; fi
 
 # Set the volume and make it the working directory
 VOLUME /home/ubuntu

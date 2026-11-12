@@ -1,0 +1,9 @@
+services:
+  xc:
+    image: xc-desktop:local
+    build:
+      context: .
+      dockerfile: Containerfile
+    working_dir: /home/ubuntu
+    volumes:
+      - ./workspace:/home/ubuntu:Z
