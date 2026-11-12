@@ -4,7 +4,7 @@ FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noniteractive
 
 WORKDIR /xc_install
-ARG XC_COMMIT_ID=0cf68aae1830d9e33121a4ec0c1f7d682d330ca1
+ARG XC_COMMIT_ID=225b80c5ffe369283d5dec8b22f033416056d820
 
 ARG MAKE_WORKERS=4
 ARG RUN_TESTS=0
@@ -32,7 +32,7 @@ RUN \
     sudo apt clean
 
 # Fetch a fixed XC revision. Changing it does not invalidate dependency installation.
-RUN git clone https://github.com/Leo-G20/xc/ xc && \
+RUN git clone https://github.com/xcfem/xc/ xc && \
     cd xc && \
     git switch --detach "$XC_COMMIT_ID"
 
