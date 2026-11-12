@@ -50,9 +50,30 @@ RUN cd /xc_install/xc/python_modules && \
 # The full verification suite is optional and disabled by default.
 RUN if [ "$RUN_TESTS" -ne 0 ]; then cd /xc_install/xc/verif && sh run_verif.sh; fi
 
-# Set the volume and make it the working directory
-VOLUME /home/ubuntu
-WORKDIR /home/ubuntu
+# Install the desktop and the matching Selkies package.
+ARG SELKIES_VERSION=2.2.1
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates curl xfce4 xfce4-terminal dbus-x11 xauth xvfb pulseaudio libgl1-mesa-dri && \
+    arch="$(dpkg --print-architecture)" && \
+    pkg="selkies-${SELKIES_VERSION}-ubuntu24.04-${arch}.deb" && \
+    curl -fsSL "https://github.com/selkies-project/selkies/releases/download/${SELKIES_VERSION}/${pkg}" -o "/tmp/${pkg}" && \
+    curl -fsSL "https://github.com/selkies-project/selkies/releases/download/${SELKIES_VERSION}/SHA256SUMS" -o /tmp/SHA256SUMS && \
+    cd /tmp && grep -F "  ${pkg}" SHA256SUMS | sha256sum --check --strict && \
+    apt-get install -y --no-install-recommends "./${pkg}" && \
+    rm -f "/tmp/${pkg}" /tmp/SHA256SUMS && \
+    rm -rf /var/lib/apt/lists/*
 
-# Reset apt iteractive for the final image
+# Rename the default Ubuntu account and move its home before declaring the volume.
+RUN usermod -l xc -d /home/xc -m ubuntu && groupmod -n xc ubuntu
+VOLUME /home/xc
+WORKDIR /home/xc
+
+# Reset apt interactive mode for the final image.
 ENV DEBIAN_FRONTEND=dialog
+
+# The Selkies session manages the display, desktop and audio processes.
+USER xc
+ENV HOME=/home/xc USER=xc LOGNAME=xc
+EXPOSE 8080
+CMD ["selkies", "session", "--session=xfce", "--public", "--port=8080", "--enable-https=true", "--basic-auth-user=xc"]
