@@ -54,7 +54,7 @@ RUN if [ "$RUN_TESTS" -ne 0 ]; then cd /xc_install/xc/verif && sh run_verif.sh; 
 ARG SELKIES_VERSION=2.2.1
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        ca-certificates curl xfce4 xfce4-terminal dbus-x11 xauth xvfb pulseaudio libgl1-mesa-dri && \
+        ca-certificates curl geany xfce4 xfce4-terminal dbus-x11 xauth xvfb pulseaudio libgl1-mesa-dri && \
     arch="$(dpkg --print-architecture)" && \
     pkg="selkies-${SELKIES_VERSION}-ubuntu24.04-${arch}.deb" && \
     curl -fsSL "https://github.com/selkies-project/selkies/releases/download/${SELKIES_VERSION}/${pkg}" -o "/tmp/${pkg}" && \
@@ -63,6 +63,10 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends "./${pkg}" && \
     rm -f "/tmp/${pkg}" /tmp/SHA256SUMS && \
     rm -rf /var/lib/apt/lists/*
+
+# Ship the wallpaper and XFCE defaults; personal settings can override them.
+COPY assets/xc_logo_alpha_channel.png /usr/share/xc-desktop/wallpaper.png
+COPY assets/xfce4-desktop.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
 
 # Rename the default Ubuntu account and move its home before declaring the volume.
 RUN usermod -l xc -d /home/xc -m ubuntu && groupmod -n xc ubuntu
