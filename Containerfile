@@ -54,7 +54,7 @@ RUN if [ "$RUN_TESTS" -ne 0 ]; then cd /xc_install/xc/verif && sh run_verif.sh; 
 ARG SELKIES_VERSION=2.2.1
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        ca-certificates curl geany xfce4 xfce4-terminal dbus-x11 xauth xvfb pulseaudio libgl1-mesa-dri && \
+        ca-certificates curl geany ristretto tumbler xfce4 xfce4-terminal dbus-x11 xauth xvfb pulseaudio libgl1-mesa-dri && \
     arch="$(dpkg --print-architecture)" && \
     pkg="selkies-${SELKIES_VERSION}-ubuntu24.04-${arch}.deb" && \
     curl -fsSL "https://github.com/selkies-project/selkies/releases/download/${SELKIES_VERSION}/${pkg}" -o "/tmp/${pkg}" && \
@@ -62,6 +62,17 @@ RUN apt-get update && \
     cd /tmp && grep -F "  ${pkg}" SHA256SUMS | sha256sum --check --strict && \
     apt-get install -y --no-install-recommends "./${pkg}" && \
     rm -f "/tmp/${pkg}" /tmp/SHA256SUMS && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Firefox from Mozilla's signed APT repository instead of Ubuntu's snap package.
+RUN apt-get update && apt-get install -y --no-install-recommends gnupg && \
+    install -d -m 0755 /etc/apt/keyrings && \
+    curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg -o /etc/apt/keyrings/packages.mozilla.org.asc && \
+    fingerprint="$(gpg --batch --show-keys --with-colons /etc/apt/keyrings/packages.mozilla.org.asc | awk -F: '$1 == "fpr" { print $10; exit }')" && \
+    test "$fingerprint" = "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3" && \
+    printf '%s\n' 'deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main' > /etc/apt/sources.list.d/mozilla.list && \
+    printf '%s\n' 'Package: firefox*' 'Pin: origin packages.mozilla.org' 'Pin-Priority: 1000' > /etc/apt/preferences.d/mozilla && \
+    apt-get update && apt-get install -y --no-install-recommends firefox && \
     rm -rf /var/lib/apt/lists/*
 
 # Ship the wallpaper and XFCE defaults; personal settings can override them.
