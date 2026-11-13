@@ -31,7 +31,7 @@ RUN \
     sudo apt install -y libgmsh-dev python3-gmsh python3-pygmsh libgmsh4.12 && \
     sudo apt clean
 
-# Fetch a fixed XC revision. Changing it does not invalidate dependency installation.
+# Fetch a fixed XC revision
 RUN git clone https://github.com/xcfem/xc/ xc && \
     cd xc && \
     git switch --detach "$XC_COMMIT_ID"
@@ -87,10 +87,10 @@ RUN apt-get update && \
         pulseaudio libgl1-mesa-dri gnome-themes-extra papirus-icon-theme && \
     rm -rf /var/lib/apt/lists/*
 
-# Prefer Ristretto for common image formats; users can choose their own defaults.
+# Prefer Ristretto for common image formats.
 COPY assets/xfce-mimeapps.list /usr/local/share/applications/xfce-mimeapps.list
 
-# Ship the wallpaper and XFCE defaults; personal settings can override them.
+# Ship the wallpaper and XFCE defaults.
 COPY assets/xc_logo_alpha_channel.png /usr/share/xc-desktop/wallpaper.png
 COPY assets/xfce4-desktop.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
 COPY assets/shortcuts/ /usr/share/xc-desktop/shortcuts/
