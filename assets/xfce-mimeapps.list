@@ -1,0 +1,6 @@
+[Default Applications]
+image/png=ristretto.desktop;
+image/jpeg=ristretto.desktop;
+image/gif=ristretto.desktop;
+image/bmp=ristretto.desktop;
+image/tiff=ristretto.desktop;

@@ -54,7 +54,7 @@ RUN if [ "$RUN_TESTS" -ne 0 ]; then cd /xc_install/xc/verif && sh run_verif.sh; 
 ARG SELKIES_VERSION=2.2.1
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        ca-certificates curl geany ristretto tumbler xfce4 xfce4-terminal dbus-x11 xauth xvfb pulseaudio libgl1-mesa-dri && \
+        ca-certificates curl geany ristretto tumbler xfce4 xfce4-terminal dbus-x11 xauth xvfb pulseaudio libgl1-mesa-dri greybird-gtk-theme && \
     arch="$(dpkg --print-architecture)" && \
     pkg="selkies-${SELKIES_VERSION}-ubuntu24.04-${arch}.deb" && \
     curl -fsSL "https://github.com/selkies-project/selkies/releases/download/${SELKIES_VERSION}/${pkg}" -o "/tmp/${pkg}" && \
@@ -76,10 +76,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends gnupg && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Fastfetch from its Ubuntu PPA.
-RUN add-apt-repository -y ppa:zhangsongcui3371/fastfetch && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends fastfetch && \
-    rm -rf /var/lib/apt/lists/*
+# RUN add-apt-repository -y ppa:zhangsongcui3371/fastfetch && \
+#     apt-get update && \
+#     apt-get install -y --no-install-recommends fastfetch && \
+#     rm -rf /var/lib/apt/lists/*
+
+# Prefer Ristretto for common image formats; users can choose their own defaults.
+COPY assets/xfce-mimeapps.list /usr/local/share/applications/xfce-mimeapps.list
 
 # Ship the wallpaper and XFCE defaults; personal settings can override them.
 COPY assets/xc_logo_alpha_channel.png /usr/share/xc-desktop/wallpaper.png
@@ -87,6 +90,9 @@ COPY assets/xfce4-desktop.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-de
 COPY assets/shortcuts/ /usr/share/xc-desktop/shortcuts/
 COPY scripts/xc-desktop-start /usr/local/bin/xc-desktop-start
 RUN chmod 755 /usr/local/bin/xc-desktop-start
+
+# Copy settings for dark theme
+COPY assets/xsettings.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
 
 # Rename the default Ubuntu account and move its home before declaring the volume.
 RUN usermod -l xc -c "xc" -d /home/xc -m ubuntu && \
