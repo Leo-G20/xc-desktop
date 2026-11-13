@@ -50,11 +50,10 @@ RUN cd /xc_install/xc/python_modules && \
 # The full verification suite is optional and disabled by default.
 RUN if [ "$RUN_TESTS" -ne 0 ]; then cd /xc_install/xc/verif && sh run_verif.sh; fi
 
-# Install the desktop and the matching Selkies package.
+# Install Selkies.
 ARG SELKIES_VERSION=2.2.1
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        ca-certificates curl geany ristretto tumbler xfce4 xfce4-terminal dbus-x11 xauth xvfb pulseaudio libgl1-mesa-dri greybird-gtk-theme && \
+    apt-get install -y --no-install-recommends ca-certificates curl && \
     arch="$(dpkg --print-architecture)" && \
     pkg="selkies-${SELKIES_VERSION}-ubuntu24.04-${arch}.deb" && \
     curl -fsSL "https://github.com/selkies-project/selkies/releases/download/${SELKIES_VERSION}/${pkg}" -o "/tmp/${pkg}" && \
@@ -80,6 +79,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends gnupg && \
 #     apt-get update && \
 #     apt-get install -y --no-install-recommends fastfetch && \
 #     rm -rf /var/lib/apt/lists/*
+
+# Install the desktop and its applications.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        geany ristretto tumbler xfce4 xfce4-terminal dbus-x11 xauth xvfb \
+        pulseaudio libgl1-mesa-dri gnome-themes-extra && \
+    rm -rf /var/lib/apt/lists/*
 
 # Prefer Ristretto for common image formats; users can choose their own defaults.
 COPY assets/xfce-mimeapps.list /usr/local/share/applications/xfce-mimeapps.list
