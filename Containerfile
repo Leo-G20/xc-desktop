@@ -84,7 +84,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends gnupg && \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         geany ristretto tumbler xfce4 xfce4-terminal dbus-x11 xauth xvfb \
-        pulseaudio libgl1-mesa-dri gnome-themes-extra && \
+        pulseaudio libgl1-mesa-dri gnome-themes-extra papirus-icon-theme && \
     rm -rf /var/lib/apt/lists/*
 
 # Prefer Ristretto for common image formats; users can choose their own defaults.
