@@ -75,6 +75,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends gnupg && \
     apt-get update && apt-get install -y --no-install-recommends firefox && \
     rm -rf /var/lib/apt/lists/*
 
+# Install Fastfetch from its Ubuntu PPA.
+RUN add-apt-repository -y ppa:zhangsongcui3371/fastfetch && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends fastfetch && \
+    rm -rf /var/lib/apt/lists/*
+
 # Ship the wallpaper and XFCE defaults; personal settings can override them.
 COPY assets/xc_logo_alpha_channel.png /usr/share/xc-desktop/wallpaper.png
 COPY assets/xfce4-desktop.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
@@ -83,7 +89,9 @@ COPY scripts/xc-desktop-start /usr/local/bin/xc-desktop-start
 RUN chmod 755 /usr/local/bin/xc-desktop-start
 
 # Rename the default Ubuntu account and move its home before declaring the volume.
-RUN usermod -l xc -d /home/xc -m ubuntu && groupmod -n xc ubuntu
+RUN usermod -l xc -c "xc" -d /home/xc -m ubuntu && \
+    groupmod -n xc ubuntu && \
+    gpasswd -d xc sudo
 VOLUME /home/xc
 WORKDIR /home/xc
 
