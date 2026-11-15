@@ -1,0 +1,53 @@
+name: Build and publish image
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: Full 40-character commit SHA to build
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Validate commit SHA
+        id: source
+        env:
+          COMMIT: ${{ inputs.commit }}
+        run: |
+          if [[ ! "$COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Enter a full lowercase 40-character commit SHA (received ${#COMMIT} characters)." >&2
+            echo "To get the current commit, run: git rev-parse HEAD" >&2
+            exit 1
+          fi
+          echo "commit=$COMMIT" >> "$GITHUB_OUTPUT"
+
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.source.outputs.commit }}
+
+      - name: Confirm checkout
+        env:
+          COMMIT: ${{ steps.source.outputs.commit }}
+        run: test "$(git rev-parse HEAD)" = "$COMMIT"
+
+      - name: Build and publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          COMMIT: ${{ steps.source.outputs.commit }}
+        run: |
+          IMAGE="ghcr.io/${REPOSITORY,,}"
+          echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$ACTOR" --password-stdin
+          docker build -f Containerfile -t "${IMAGE}:sha-${COMMIT}" -t "${IMAGE}:latest" .
+          docker push "${IMAGE}:sha-${COMMIT}"
+          docker push "${IMAGE}:latest"
