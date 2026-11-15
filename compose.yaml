@@ -1,9 +1,6 @@
 services:
   xc:
-    image: xc-desktop:local
-    build:
-      context: .
-      dockerfile: Containerfile
+    image: ghcr.io/leo-g20/xc-desktop:latest
     userns_mode: "keep-id:uid=1000,gid=1000"
     ports:
       - "127.0.0.1:8080:8080"
@@ -15,4 +12,4 @@ services:
       SELKIES_USE_CPU: "true"
       SELKIES_ENCODER: h264enc
     volumes:
-      - ./workspace:/home/xc:Z
+      - ./workspace:/home/xc
