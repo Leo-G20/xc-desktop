@@ -64,13 +64,14 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Firefox from Mozilla's signed APT repository instead of Ubuntu's snap package.
+# see https://support.mozilla.org/en-US/kb/install-firefox-linux
 RUN apt-get update && apt-get install -y --no-install-recommends gnupg && \
     install -d -m 0755 /etc/apt/keyrings && \
     curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg -o /etc/apt/keyrings/packages.mozilla.org.asc && \
     fingerprint="$(gpg --batch --show-keys --with-colons /etc/apt/keyrings/packages.mozilla.org.asc | awk -F: '$1 == "fpr" { print $10; exit }')" && \
     test "$fingerprint" = "35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3" && \
     printf '%s\n' 'deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main' > /etc/apt/sources.list.d/mozilla.list && \
-    printf '%s\n' 'Package: firefox*' 'Pin: origin packages.mozilla.org' 'Pin-Priority: 1000' > /etc/apt/preferences.d/mozilla && \
+    printf '%s\n' 'Package: *' 'Pin: origin packages.mozilla.org' 'Pin-Priority: 1000' > /etc/apt/preferences.d/mozilla && \
     apt-get update && apt-get install -y --no-install-recommends firefox && \
     rm -rf /var/lib/apt/lists/*
 
