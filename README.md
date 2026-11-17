@@ -15,7 +15,10 @@ This is an experimental desktop image adapted from XC’s existing Docker build.
 
    For Docker, use `docker compose up -d`.
 
-3. Open https://localhost:8080 in your browser. Log in as `xc` with password `1234`.
+3. Open https://localhost:8080 in your **browser** (see below). Log in as `xc` with password `1234`.
+
+**Browser**: 
+A Chromium-based browser (such as Chrome, Brave, Vivaldi, or Helium) is recommended. Firefox had higher latency and lower frame rates during testing.
 
 ## Manual Build
 
