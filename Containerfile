@@ -4,10 +4,6 @@ FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noniteractive
 
 WORKDIR /xc_install
-ARG XC_COMMIT_ID=225b80c5ffe369283d5dec8b22f033416056d820
-
-ARG MAKE_WORKERS=4
-ARG RUN_TESTS=0
 
 
 RUN \
@@ -30,25 +26,6 @@ RUN \
     sudo apt install -y mayavi2 python3-ezdxf python3-cairo python3-cairo-dev && \
     sudo apt install -y libgmsh-dev python3-gmsh python3-pygmsh libgmsh4.12 && \
     sudo apt clean
-
-# Fetch a fixed XC revision
-RUN git clone https://github.com/xcfem/xc/ xc && \
-    cd xc && \
-    git switch --detach "$XC_COMMIT_ID"
-
-# Configure and build XC.
-RUN mkdir /xc_install/build && \
-    cd /xc_install/build && \
-    cmake /xc_install/xc/src && \
-    make -j "$MAKE_WORKERS" && \
-    sudo make install
-
-# Install the XC Python modules.
-RUN cd /xc_install/xc/python_modules && \
-    sudo sh local_install.sh
-
-# The full verification suite is optional and disabled by default.
-RUN if [ "$RUN_TESTS" -ne 0 ]; then cd /xc_install/xc/verif && sh run_verif.sh; fi
 
 # Install Selkies.
 ARG SELKIES_VERSION=2.2.1
@@ -75,18 +52,45 @@ RUN apt-get update && apt-get install -y --no-install-recommends gnupg && \
     apt-get update && apt-get install -y --no-install-recommends firefox && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Fastfetch from its Ubuntu PPA.
-# RUN add-apt-repository -y ppa:zhangsongcui3371/fastfetch && \
-#     apt-get update && \
-#     apt-get install -y --no-install-recommends fastfetch && \
-#     rm -rf /var/lib/apt/lists/*
-
 # Install the desktop and its applications.
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         geany ristretto tumbler xfce4 xfce4-terminal dbus-x11 xauth xvfb \
         pulseaudio libgl1-mesa-dri gnome-themes-extra papirus-icon-theme && \
     rm -rf /var/lib/apt/lists/*
+
+#################### XC
+
+ARG XC_COMMIT_ID=225b80c5ffe369283d5dec8b22f033416056d820
+
+ARG MAKE_WORKERS=4
+ARG RUN_TESTS=0
+
+# Fetch a fixed XC revision
+RUN git clone https://github.com/xcfem/xc/ xc && \
+    cd xc && \
+    git switch --detach "$XC_COMMIT_ID"
+
+# Configure and build XC.
+RUN mkdir /xc_install/build && \
+    cd /xc_install/build && \
+    cmake /xc_install/xc/src && \
+    make -j "$MAKE_WORKERS" && \
+    sudo make install
+
+# Install the XC Python modules.
+RUN cd /xc_install/xc/python_modules && \
+    sudo sh local_install.sh
+
+# The full verification suite is optional and disabled by default.
+RUN if [ "$RUN_TESTS" -ne 0 ]; then cd /xc_install/xc/verif && sh run_verif.sh; fi
+
+
+# Install Fastfetch from its Ubuntu PPA.
+# RUN add-apt-repository -y ppa:zhangsongcui3371/fastfetch && \
+#     apt-get update && \
+#     apt-get install -y --no-install-recommends fastfetch && \
+#     rm -rf /var/lib/apt/lists/*
 
 # Prefer Ristretto for common image formats.
 COPY assets/xfce-mimeapps.list /usr/local/share/applications/xfce-mimeapps.list
