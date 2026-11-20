@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       commit:
-        description: Full 40-character commit SHA to build
+        description: "Enter the full 40-character commit SHA from xc-desktop. The Containerfile selects the XC revision"
         required: true
         type: string
 
