@@ -9,6 +9,7 @@ on:
         type: string
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
 
@@ -39,6 +40,9 @@ jobs:
           COMMIT: ${{ steps.source.outputs.commit }}
         run: test "$(git rev-parse HEAD)" = "$COMMIT"
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
       - name: Build and publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -48,6 +52,10 @@ jobs:
         run: |
           IMAGE="ghcr.io/${REPOSITORY,,}"
           echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$ACTOR" --password-stdin
-          docker build -f Containerfile -t "${IMAGE}:sha-${COMMIT}" -t "${IMAGE}:latest" .
-          docker push "${IMAGE}:sha-${COMMIT}"
-          docker push "${IMAGE}:latest"
+          docker buildx build \
+            --file Containerfile \
+            --cache-from "type=registry,ref=${IMAGE}:buildcache" \
+            --cache-to "type=registry,ref=${IMAGE}:buildcache,mode=max" \
+            --tag "${IMAGE}:sha-${COMMIT}" \
+            --tag "${IMAGE}:latest" \
+            --push .
