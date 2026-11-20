@@ -59,18 +59,17 @@ RUN apt-get update && \
         pulseaudio libgl1-mesa-dri gnome-themes-extra papirus-icon-theme && \
     rm -rf /var/lib/apt/lists/*
 
-#################### XC
+######################################## XC
 
 ARG XC_COMMIT_ID=225b80c5ffe369283d5dec8b22f033416056d820
-
-ARG MAKE_WORKERS=4
-ARG RUN_TESTS=0
 
 # Fetch a fixed XC revision
 RUN git clone https://github.com/xcfem/xc/ xc && \
     cd xc && \
     git switch --detach "$XC_COMMIT_ID"
 
+
+ARG MAKE_WORKERS=4
 # Configure and build XC.
 RUN mkdir /xc_install/build && \
     cd /xc_install/build && \
@@ -82,9 +81,12 @@ RUN mkdir /xc_install/build && \
 RUN cd /xc_install/xc/python_modules && \
     sudo sh local_install.sh
 
+
+ARG RUN_TESTS=0
 # The full verification suite is optional and disabled by default.
 RUN if [ "$RUN_TESTS" -ne 0 ]; then cd /xc_install/xc/verif && sh run_verif.sh; fi
 
+########################################
 
 # Install Fastfetch from its Ubuntu PPA.
 # RUN add-apt-repository -y ppa:zhangsongcui3371/fastfetch && \
