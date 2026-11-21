@@ -1,0 +1,7 @@
+Port 2332
+PidFile none
+AllowUsers xc
+AuthenticationMethods publickey
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+Subsystem sftp internal-sftp

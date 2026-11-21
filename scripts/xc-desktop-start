@@ -15,4 +15,13 @@ if [ ! -e "$state_dir/shortcuts-initialized" ]; then
     touch "$state_dir/shortcuts-initialized"
 fi
 
+if [ "${XC_ENABLE_SSH:-false}" = "true" ]; then
+    host_key="$state_dir/ssh/host_ed25519_key"
+    install -d -m 700 "$state_dir/ssh"
+    if [ ! -f "$host_key" ]; then
+        ssh-keygen -q -t ed25519 -N '' -f "$host_key"
+    fi
+    /usr/sbin/sshd -e -f /etc/ssh/xc_sshd_config -h "$host_key"
+fi
+
 exec selkies session --session=xfce --public --port=8080 --enable-https=true --basic-auth-user=xc

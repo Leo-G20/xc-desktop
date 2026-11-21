@@ -97,6 +97,14 @@ RUN if [ "$RUN_TESTS" -ne 0 ]; then cd /xc_install/xc/verif && sh run_verif.sh; 
 # Prefer Ristretto for common image formats.
 COPY assets/xfce-mimeapps.list /usr/local/share/applications/xfce-mimeapps.list
 
+# The optional SSH server generates its host key in the workspace on first use.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends openssh-server && \
+    rm -f /etc/ssh/ssh_host_* && \
+    mkdir -p /run/sshd && \
+    rm -rf /var/lib/apt/lists/*
+COPY assets/sshd_config /etc/ssh/xc_sshd_config
+
 # Ship the wallpaper and XFCE defaults.
 COPY assets/xc_logo_alpha_channel.png /usr/share/xc-desktop/wallpaper.png
 COPY assets/xfce4-desktop.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
