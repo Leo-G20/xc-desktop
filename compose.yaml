@@ -1,7 +1,8 @@
 services:
   xc:
     image: ghcr.io/leo-g20/xc-desktop:latest
-    userns_mode: "keep-id:uid=1000,gid=1000"
+    # With rootless Podman, uncomment userns_mode so xc can write to ./workspace
+    # userns_mode: "keep-id:uid=1000,gid=1000"
     ports:
       - "127.0.0.1:8080:8080"
       # For SSH, uncomment this port and XC_ENABLE_SSH below.
@@ -15,4 +16,4 @@ services:
       SELKIES_USE_CPU: "true"
       SELKIES_ENCODER: h264enc
     volumes:
-      - ./workspace:/home/xc:Z
+      - ./workspace:/home/xc
