@@ -70,8 +70,9 @@ RUN git clone https://github.com/xcfem/xc/ xc && \
 
 
 ARG MAKE_WORKERS=4
-# Configure and build XC.
-RUN mkdir /xc_install/build && \
+# Use the compiler's default CPU
+RUN sed -i 's/ -march=native / /g' /xc_install/xc/src/CMakeLists.txt && \
+    mkdir /xc_install/build && \
     cd /xc_install/build && \
     cmake /xc_install/xc/src && \
     make -j "$MAKE_WORKERS" && \
