@@ -52,12 +52,10 @@ jobs:
         run: |
           IMAGE="ghcr.io/${REPOSITORY,,}"
           echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$ACTOR" --password-stdin
-          # Registry cache options disabled for the uncached build test.
-          # --cache-from "type=registry,ref=${IMAGE}:buildcache"
-          # --cache-to "type=registry,ref=${IMAGE}:buildcache,mode=max"
           docker buildx build \
             --file Containerfile \
-            --no-cache \
+            --cache-from "type=registry,ref=${IMAGE}:buildcache" \
+            --cache-to "type=registry,ref=${IMAGE}:buildcache,mode=max" \
             --tag "${IMAGE}:sha-${COMMIT}" \
             --tag "${IMAGE}:latest" \
             --push .
